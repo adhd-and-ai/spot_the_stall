@@ -1,0 +1,831 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Spot the Stall</title>
+<meta name="description" content="A three-round practice game for spotting a task initiation stall, finding where it begins, and naming its pattern.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect x=%223%22 y=%226%22 width=%2226%22 height=%2220%22 rx=%224%22 fill=%22%232B4BA0%22/%3E%3Crect x=%228%22 y=%2212%22 width=%2216%22 height=%223%22 rx=%221.5%22 fill=%22%23fff%22/%3E%3Crect x=%228%22 y=%2218%22 width=%2210%22 height=%223%22 rx=%221.5%22 fill=%22%23FFF2C2%22/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&display=swap">
+<style>
+/* Layout: one index card at the center of a quiet desk; a sticky-note speech bubble sits beside it (below it on phones). */
+:root {
+  --bg: #E6ECF1;
+  --bg-deep: #D9E1E8;
+  --card: #FFFFFF;
+  --ink: #18212C;
+  --muted: #4A5665;
+  --rule: #DCE4EC;
+  --margin-line: #C9D5F2;
+  --accent: #2B4BA0;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #E3E9F8;
+  --note: #FFF2C2;
+  --note-edge: #E9D58A;
+  --note-ink: #2A2410;
+  --ok: #1C6644;
+  --ok-soft: #E1F2E8;
+  --retry: #7A4600;
+  --retry-soft: #FBEBD3;
+  --focus: #1F3F99;
+  --shadow: 0 1px 2px rgba(24,33,44,.08), 0 8px 24px rgba(24,33,44,.08);
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Verdana", "Segoe UI", system-ui, sans-serif;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121820; --bg-deep: #0D1218; --card: #1C2530; --ink: #E8EDF2; --muted: #AAB5C2;
+    --rule: #2A3542; --margin-line: #34436B; --accent: #A9BDF7; --accent-ink: #0F1830; --accent-soft: #24304D;
+    --note: #3A3420; --note-edge: #5C5130; --note-ink: #F4ECD2;
+    --ok: #8DD9B1; --ok-soft: #1B3328; --retry: #F3BE78; --retry-soft: #3A2C17; --focus: #C5D3FA;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121820; --bg-deep: #0D1218; --card: #1C2530; --ink: #E8EDF2; --muted: #AAB5C2;
+  --rule: #2A3542; --margin-line: #34436B; --accent: #A9BDF7; --accent-ink: #0F1830; --accent-soft: #24304D;
+  --note: #3A3420; --note-edge: #5C5130; --note-ink: #F4ECD2;
+  --ok: #8DD9B1; --ok-soft: #1B3328; --retry: #F3BE78; --retry-soft: #3A2C17; --focus: #C5D3FA;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 24px 48px;
+  min-height: 100%;
+}
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 6px; }
+
+.wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 28px; }
+
+/* Header */
+.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 24px; }
+.brand { display: grid; gap: 2px; min-width: 0; }
+.eyebrow { font-size: .8125rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.brand h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.75rem, 4vw, 2.25rem); line-height: 1.1; margin: 0; letter-spacing: -.01em; }
+
+.rounds { display: flex; gap: 6px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+.rounds li {
+  font-size: .875rem; padding: 6px 12px; border-radius: 999px;
+  border: 1.5px solid var(--rule); color: var(--muted); background: var(--card);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.rounds li[aria-current="step"] { border-color: var(--accent); color: var(--ink); font-weight: 700; }
+.rounds li.done { color: var(--ink); }
+.rounds li.done::before { content: "\2713"; font-weight: 700; color: var(--ok); }
+
+/* Stage */
+.stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 36rem) minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+.center { grid-column: 2; display: grid; gap: 20px; min-width: 0; }
+.side { grid-column: 3; min-width: 0; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); }
+@media (max-width: 1020px) {
+  .stage { grid-template-columns: minmax(0, 1fr); }
+  .center, .side { grid-column: 1; }
+  .center { max-width: 38rem; width: 100%; margin: 0 auto; }
+  .side { position: static; max-width: 38rem; width: 100%; margin: 0 auto; }
+}
+
+.progress { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.progress-label { font-size: .9375rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.dots { display: flex; gap: 8px; list-style: none; margin: 0; padding: 0; }
+.dots li { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--muted); background: transparent; }
+.dots li.done { background: var(--accent); border-color: var(--accent); }
+.dots li.current { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); background: var(--card); }
+
+/* Index card */
+.card {
+  background-color: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px 28px 28px;
+  min-width: 0;
+}
+.card:focus { outline: none; }
+.card:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }
+.card-kicker { font-size: .8125rem; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin: 0 0 8px; }
+.card h2 { font-family: var(--font-display); font-weight: 700; font-size: 1.5rem; line-height: 1.2; margin: 0 0 12px; text-wrap: balance; }
+.scene { font-size: clamp(1.2rem, 2.4vw, 1.375rem); line-height: 1.55; margin: 0; max-width: 34em; }
+.card p { max-width: 62ch; }
+.card p + p { margin-top: 12px; }
+.intro-list { margin: 12px 0 0; padding-left: 1.2em; display: grid; gap: 6px; }
+
+/* Buttons */
+button { font: inherit; color: inherit; }
+.btn {
+  appearance: none; border: 2px solid var(--accent); background: var(--accent); color: var(--accent-ink);
+  font-weight: 700; font-size: 1.0625rem; padding: 12px 22px; border-radius: 8px; cursor: pointer;
+  min-height: 48px; line-height: 1.2;
+}
+.btn:hover { filter: brightness(1.08); }
+.btn.ghost { background: var(--card); color: var(--accent); }
+.btn.ghost:hover { background: var(--accent-soft); filter: none; }
+.btn-row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+.choice-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.choice {
+  appearance: none; cursor: pointer; min-height: 64px; padding: 14px 16px; border-radius: 10px;
+  background: var(--card); border: 2px solid var(--accent); color: var(--ink);
+  font-family: var(--font-display); font-weight: 700; font-size: 1.25rem;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  box-shadow: var(--shadow);
+}
+.choice:hover { background: var(--accent-soft); }
+.choice .tag { font-family: var(--font-body); font-size: .8125rem; font-weight: 700; letter-spacing: .02em; }
+.choice.tried { border-style: dashed; border-color: var(--retry); }
+.choice.tried .tag { color: var(--retry); }
+.choice.right { border-color: var(--ok); background: var(--ok-soft); }
+.choice.right .tag { color: var(--ok); }
+
+/* Story lines */
+.step-prompt { font-weight: 700; margin: 0 0 12px; display: flex; gap: 10px; align-items: baseline; }
+.step-num { font-size: .8125rem; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); white-space: nowrap; }
+.lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.line-btn {
+  appearance: none; width: 100%; text-align: left; cursor: pointer;
+  background: transparent; border: 2px solid transparent; border-radius: 8px;
+  padding: 8px 12px; font-size: 1.1875rem; line-height: 1.45;
+  display: grid; grid-template-columns: 1.6em minmax(0,1fr); gap: 6px; align-items: start;
+}
+.line-btn:hover { background: var(--accent-soft); border-color: var(--accent-soft); }
+.line-btn .ln { color: var(--muted); font-size: .9375rem; font-variant-numeric: tabular-nums; padding-top: 3px; }
+.line-btn .badge { grid-column: 2; justify-self: start; font-size: .8125rem; font-weight: 700; padding: 2px 10px; border-radius: 999px; margin-top: 4px; }
+.line-btn.tried { border-style: dashed; border-color: var(--retry); }
+.line-btn.tried .badge { color: var(--retry); background: var(--retry-soft); }
+.line-btn.hit { border-color: var(--ok); background: var(--ok-soft); }
+.line-btn.hit .badge { color: var(--ok); background: var(--card); border: 1.5px solid var(--ok); }
+.line-btn.locked { cursor: default; }
+.line-btn.locked:hover:not(.hit):not(.tried) { background: transparent; border-color: transparent; }
+.line-enter { animation: lineIn .45s ease-out both; }
+@keyframes lineIn { from { opacity: .15; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.show-all { margin-top: 12px; background: none; border: none; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 6px 0; font-size: .9375rem; }
+
+.patterns { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+@media (max-width: 560px) { .patterns { grid-template-columns: minmax(0,1fr); } .choice-pair { gap: 10px; } }
+.pattern {
+  appearance: none; cursor: pointer; text-align: left; background: var(--card); color: var(--ink);
+  border: 2px solid var(--rule); border-radius: 10px; padding: 12px 14px; display: grid; gap: 2px; min-width: 0; align-content: start;
+  box-shadow: var(--shadow);
+}
+.pattern:hover { border-color: var(--accent); }
+.pattern strong { font-family: var(--font-display); font-size: 1.0625rem; font-weight: 700; }
+.pattern span { font-size: .9375rem; color: var(--muted); }
+.pattern .badge { font-size: .8125rem; font-weight: 700; justify-self: start; padding: 2px 10px; border-radius: 999px; margin-top: 4px; }
+.pattern.tried { border-style: dashed; border-color: var(--retry); }
+.pattern.tried .badge { color: var(--retry); background: var(--retry-soft); }
+.pattern.hit { border-color: var(--ok); background: var(--ok-soft); }
+.pattern.hit .badge { color: var(--ok); background: var(--card); border: 1.5px solid var(--ok); }
+.section-h { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; margin: 0; }
+
+/* Round 3 */
+.picks { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.pick {
+  display: grid; grid-template-columns: 28px minmax(0,1fr); gap: 12px; align-items: start; cursor: pointer;
+  background: var(--card); border: 2px solid var(--rule); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow);
+}
+.pick:hover { border-color: var(--accent); }
+.pick:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.pick:has(input:focus-visible) { outline: 3px solid var(--focus); outline-offset: 3px; }
+.pick input { width: 22px; height: 22px; margin: 2px 0 0; accent-color: var(--accent); }
+.pick-text { display: grid; gap: 2px; }
+.pick-text .pname { font-size: .8125rem; font-weight: 700; color: var(--muted); letter-spacing: .02em; }
+.pick-text .pname::before { content: "Pattern: "; }
+.pick input:checked ~ .pick-text .pname { color: var(--accent); }
+details.ref { background: var(--card); border-radius: 10px; border: 2px solid var(--rule); padding: 4px 16px; }
+details.ref summary { cursor: pointer; font-weight: 700; color: var(--accent); padding: 10px 0; }
+details.ref dl { margin: 4px 0 12px; display: grid; gap: 10px; }
+details.ref dt { font-weight: 700; }
+details.ref dd { margin: 0; color: var(--muted); }
+.inline-msg { color: var(--retry); font-weight: 700; margin: 0; }
+.inline-msg::before { content: "\2192\00a0"; }
+
+/* Snapshot */
+.snap h2 { font-size: 1.75rem; }
+.snap-date { color: var(--muted); font-size: .9375rem; margin: -6px 0 16px; }
+.snap-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.snap-list li { display: grid; gap: 2px; }
+.snap-list strong { font-family: var(--font-display); font-size: 1.25rem; }
+.snap-list span { color: var(--muted); }
+.snap-foot { margin-top: 18px; font-size: .9375rem; color: var(--muted); }
+.status { font-size: .9375rem; color: var(--muted); min-height: 1.5em; margin: 0; }
+
+/* Bubble */
+.bubble {
+  position: relative; background: var(--note); color: var(--note-ink); border: 1.5px solid var(--note-edge);
+  border-radius: 14px; padding: 18px 20px; box-shadow: var(--shadow); display: grid; gap: 10px;
+}
+.bubble::before {
+  content: ""; position: absolute; left: -11px; top: 34px; width: 20px; height: 20px;
+  background: var(--note); border-left: 1.5px solid var(--note-edge); border-bottom: 1.5px solid var(--note-edge);
+  transform: rotate(45deg);
+}
+@media (max-width: 1020px) {
+  .bubble::before { left: 40px; top: -11px; border-left: 1.5px solid var(--note-edge); border-top: 1.5px solid var(--note-edge); border-bottom: 0; }
+}
+.bubble:focus { outline: none; }
+.bubble-who { font-size: .8125rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; opacity: .85; margin: 0; }
+.bubble-rest { margin: 0; }
+.fb { display: grid; gap: 8px; }
+.fb:empty { display: none; }
+.fb-label { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-family: var(--font-display); font-size: 1.125rem; margin: 0; }
+.fb-label .ico { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; font-size: .9rem; line-height: 1; flex: none; }
+.fb-label.ok .ico { background: var(--ok); color: var(--card); }
+.fb-label.retry .ico { background: transparent; border: 2px dashed var(--retry); color: var(--note-ink); }
+.fb p { margin: 0; }
+.fb .note { border-top: 1.5px dashed var(--note-edge); padding-top: 8px; }
+.fb .note b { display: block; }
+.fb .clue b { font-weight: 700; }
+.bubble .btn { justify-self: start; }
+
+/* Closing */
+.closing { font-family: var(--font-display); font-size: clamp(1.35rem, 3vw, 1.75rem); line-height: 1.35; font-weight: 500; margin: 0; text-wrap: pretty; }
+
+@media print {
+  :root, :root[data-theme="dark"], :root:not([data-theme="light"]) {
+    --bg: #FFFFFF; --card: #FFFFFF; --ink: #000000; --muted: #333333; --accent: #1F3A85; color-scheme: light;
+  }
+  body { background: #FFFFFF; padding: 0; }
+  body.printing-snap .top, body.printing-snap .side, body.printing-snap .center > :not(#snapCard) { display: none !important; }
+  body.printing-snap .stage { display: block; }
+  body.printing-snap #snapCard { box-shadow: none; border: 1.5px solid #999999; max-width: 40rem; margin: 0 auto; break-inside: avoid; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .line-enter { animation: none; }
+  * { scroll-behavior: auto !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <span class="eyebrow">ADHD and AI &middot; Module 1, Lesson 1</span>
+      <h1>Spot the Stall</h1>
+    </div>
+    <nav aria-label="Rounds">
+      <ol class="rounds" id="rounds">
+        <li data-r="1">Round 1</li>
+        <li data-r="2">Round 2</li>
+        <li data-r="3">Round 3</li>
+      </ol>
+    </nav>
+  </header>
+
+  <main class="stage">
+    <div class="center" id="center"></div>
+    <aside class="side" aria-label="Feedback">
+      <div class="bubble" id="bubble" tabindex="-1">
+        <p class="bubble-who" aria-hidden="true">Feedback</p>
+        <p class="bubble-rest" id="bubbleRest"></p>
+        <div class="fb" id="fb" aria-live="polite" aria-atomic="true"></div>
+        <div id="bubbleAction"></div>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Content ---------- */
+  const PATTERNS = [
+    { id: "first", name: "Can't make the first move", def: "The task is clear, but the action doesn't follow." },
+    { id: "switch", name: "Switching tasks", def: "Starting one thing, drifting to another, then another, without much progress on any single task." },
+    { id: "over", name: "Overthinking the first step", def: "Turning a simple starting point over and over, looking for the “right” way to begin." },
+    { id: "decide", name: "Waiting on a decision", def: "The task can't start until something else gets decided first." },
+    { id: "where", name: "Not knowing where to begin", def: "More than one possible starting point, and none of them feels like the right one." },
+    { id: "deadline", name: "No deadline", def: "Without a due date or someone waiting on it, a task can sit untouched." },
+    { id: "dread", name: "Some dread attached", def: "Nothing about the task is complicated, but starting it means dealing with a feeling, not just a step." }
+  ];
+  const P = Object.fromEntries(PATTERNS.map(p => [p.id, p]));
+
+  const R1 = [
+    { id: 1, scene: "You planned to start a project at 2:00. It's 2:40. The file is open, and you're still looking at the title slide.", stall: true,
+      fb: "This is a stall. You meant to start, and the start didn't happen.", clue: "Compare the time you planned to start with the time it is now." },
+    { id: 2, scene: "You finish one section of the form and take the ten-minute break you planned. Ten minutes later, you're back.", stall: false,
+      fb: "This is not a stall. A planned break with a return is part of the work.", clue: "Notice what happened when the ten minutes were up." },
+    { id: 3, scene: "You sent the draft to a coworker. You can't continue until they reply.", stall: false,
+      fb: "This is not a stall. The next move belongs to someone else.", clue: "Ask yourself whose move comes next. A stall is when the next move is yours." },
+    { id: 4, scene: "The laundry has been in the basket since Sunday. You walk past it every day and think, “Later.”", stall: true,
+      fb: "This is a stall. “Later” keeps repeating, and the task hasn't moved.", clue: "Notice how many times “Later” has come up, and whether the task has moved." },
+    { id: 5, scene: "You look at your list and move the closet cleanup to next month, because this week is full.", stall: false,
+      fb: "This is not a stall. This was a choice made on purpose, with a new date.", clue: "Notice whether the task got a new date on purpose." },
+    { id: 6, scene: "You need to reply to a message. You've opened it four times today and closed it each time.", stall: true,
+      fb: "This is a stall. You keep arriving at the task without beginning it.", clue: "Count how many times you've opened the message, and what happened each time." }
+  ];
+
+  const LINE_CLUE = "Look for the line where the task stops moving forward.";
+  const R2 = [
+    { title: "The bill", pattern: "first",
+      lines: ["The bill is due Friday.", "You open the banking app.", "The amount is typed in.", "Your thumb rests over the Pay button. Minutes pass.", "The screen dims."],
+      stall: 3, fb: "Everything was ready. The action just didn't follow." },
+    { title: "The kitchen counter", pattern: "switch",
+      lines: ["You start clearing the kitchen counter.", "You carry a mug to the sink and notice the plant needs water.", "You fill the watering can and see the mail on the table.", "You open one envelope.", "The counter looks the same as before."],
+      stall: 1, altLines: { 2: "This one works too. The drift started one line earlier." },
+      fb: "Each new thing pulled you one step further from the counter." },
+    { title: "The message", pattern: "over",
+      lines: ["You need to tell a friend you can't come on Saturday.", "You type, “Hi, so sorry.”", "You delete it. Is that too formal?", "You type, “Hey, bad news.” You delete that too.", "Twenty minutes later, the message box is empty."],
+      stall: 2, altPattern: { dread: "This one fits too. Canceling on a friend can carry a feeling." },
+      fb: "The search for the right opening replaced the opening." },
+    { title: "The gift", pattern: "decide",
+      lines: ["Your sister's birthday is in two weeks.", "You sit down to order a gift.", "You can't settle between the book and the scarf.", "You close the tab to think about it.", "A week later, nothing is ordered."],
+      stall: 2, fb: "The order is stuck behind one unresolved choice." },
+    { title: "The spare room", pattern: "where",
+      lines: ["The spare room needs clearing out.", "You stand in the doorway.", "The boxes? The shelf? The pile by the window?", "Each one seems like the wrong place to start.", "You close the door."],
+      stall: 3, altLines: { 2: "This one works too. The search for a place to start begins here." },
+      fb: "There were several ways in, and none felt like the right one." },
+    { title: "The résumé", pattern: "deadline",
+      lines: ["You want to update your résumé.", "No one has asked for it.", "There's no date attached.", "Each weekend, it moves to the next weekend.", "It's been four months."],
+      stall: 3, fb: "With no due date and no one waiting, the task just sits." },
+    { title: "The envelope", pattern: "dread",
+      lines: ["An envelope from the tax office arrives.", "Opening it would take five seconds.", "You put it on the shelf, face down.", "Your stomach tightens each time you walk past it.", "It's been there nine days."],
+      stall: 2, fb: "The step is simple. Starting it means dealing with a feeling, not just a step." }
+  ];
+
+  const R3 = [
+    { id: "first", text: "I knew what to do, and the action didn't follow." },
+    { id: "switch", text: "I started one thing and drifted to another." },
+    { id: "over", text: "I kept turning the first step over, looking for the right way to begin." },
+    { id: "decide", text: "I couldn't start until I decided something else first." },
+    { id: "where", text: "I saw several places to begin and couldn't pick one." },
+    { id: "deadline", text: "Nothing was due, so the task sat." },
+    { id: "dread", text: "The task was simple, but starting meant facing a feeling." },
+    { id: "unsure", text: "Not sure yet." }
+  ];
+
+  const CLOSING = "You can now tell a stall from a pause, find the moment it begins, and name its pattern. Naming the stall is the first step toward a different way in.";
+
+  /* ---------- State ---------- */
+  const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let S;
+  function freshState() {
+    return {
+      view: "welcome", // welcome | r1intro | r1 | r2intro | r2 | r3 | snapshot | closing
+      order: shuffle(R1.map(c => c.id)),
+      i: 0,
+      r1Tried: [], r1Done: false,
+      s: 0, shown: 0, step: 1, linesTried: [], lineHit: null, patTried: [], patHit: null,
+      picks: [], snapDate: null
+    };
+  }
+  function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+  /* ---------- DOM helpers ---------- */
+  const $ = id => document.getElementById(id);
+  const center = $("center"), fb = $("fb"), rest = $("bubbleRest"), action = $("bubbleAction"), bubble = $("bubble");
+  function h(tag, attrs, ...kids) {
+    const el = document.createElement(tag);
+    if (attrs) for (const k in attrs) {
+      const v = attrs[k];
+      if (v == null || v === false) continue;
+      if (k === "class") el.className = v;
+      else if (k === "text") el.textContent = v;
+      else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+      else el.setAttribute(k, v === true ? "" : v);
+    }
+    for (const kid of kids.flat()) if (kid != null && kid !== false) el.append(kid.nodeType ? kid : document.createTextNode(kid));
+    return el;
+  }
+  function setRounds(r, doneUpTo) {
+    document.querySelectorAll("#rounds li").forEach(li => {
+      const n = +li.dataset.r;
+      li.classList.toggle("done", n <= doneUpTo);
+      if (n === r) li.setAttribute("aria-current", "step"); else li.removeAttribute("aria-current");
+      li.querySelector(".sr-only")?.remove();
+      if (n <= doneUpTo) li.append(h("span", { class: "sr-only", text: ", complete" }));
+    });
+  }
+  function progress(total, idx, label, noun) {
+    const ol = h("ol", { class: "dots", "aria-hidden": "true" });
+    for (let k = 0; k < total; k++) ol.append(h("li", { class: k < idx ? "done" : k === idx ? "current" : "" }));
+    return h("div", { class: "progress" },
+      h("span", { class: "progress-label", text: label }),
+      ol,
+      h("span", { class: "sr-only", text: `${noun} ${idx + 1} of ${total}` }));
+  }
+  function bubbleRest(text) { rest.textContent = text; rest.hidden = !text; fb.replaceChildren(); action.replaceChildren(); }
+  function feedback(kind, label, parts, nextBtn) {
+    rest.hidden = true;
+    const lab = h("p", { class: "fb-label " + kind },
+      h("span", { class: "ico", "aria-hidden": "true", text: kind === "ok" ? "✓" : "↻" }),
+      label);
+    fb.replaceChildren(lab, ...parts);
+    action.replaceChildren();
+    if (nextBtn) { action.append(nextBtn); setTimeout(() => nextBtn.focus(), 30); }
+    if (window.matchMedia("(max-width: 1020px)").matches) setTimeout(() => bubble.scrollIntoView({ block: "nearest", behavior: reduceMotion ? "auto" : "smooth" }), 60);
+  }
+  function focusEl(el) { if (el) { el.setAttribute("tabindex", "-1"); el.focus({ preventScroll: false }); } }
+
+  /* ---------- Views ---------- */
+  function render() {
+    stopReveal();
+    const v = S.view;
+    if (v === "welcome") return viewWelcome();
+    if (v === "r1intro") return viewR1Intro();
+    if (v === "r1") return viewR1();
+    if (v === "r2intro") return viewR2Intro();
+    if (v === "r2") return viewR2();
+    if (v === "r3") return viewR3();
+    if (v === "snapshot") return viewSnapshot();
+    if (v === "closing") return viewClosing();
+  }
+  function go(view) { S.view = view; render(); const t = center.querySelector("h2"); focusEl(t); }
+
+  function viewWelcome() {
+    setRounds(0, 0);
+    const card = h("section", { class: "card", "aria-labelledby": "wh" },
+      h("p", { class: "card-kicker", text: "About five minutes" }),
+      h("h2", { id: "wh", text: "Practice spotting a stall" }),
+      h("p", { text: "A stall is when you mean to move a task forward, the next move is yours, and it isn't happening. In this game, you'll practice noticing one." }),
+      h("ul", { class: "intro-list" },
+        h("li", { text: "Round 1: Decide if a scene is a stall or not." }),
+        h("li", { text: "Round 2: Find the moment a stall begins, then name its pattern." }),
+        h("li", { text: "Round 3: Make a snapshot of the stalls you've noticed in your own life." })),
+      h("p", { text: "There's no timer and no score. If an answer doesn't fit, you'll get a clue and another try." }));
+    const saved = loadPicks();
+    center.replaceChildren(card, h("div", { class: "btn-row" },
+      h("button", { class: "btn", type: "button", onclick: () => go("r1intro"), text: "Start" }),
+      saved ? h("button", { class: "btn ghost", type: "button", text: "See my last snapshot", onclick: () => { S.picks = saved.picks; S.snapDate = saved.date; go("snapshot"); } }) : null));
+    bubbleRest("Feedback shows up here after each answer. Take as much time as you need.");
+  }
+
+  function viewR1Intro() {
+    setRounds(1, 0);
+    const card = h("section", { class: "card", "aria-labelledby": "r1h" },
+      h("p", { class: "card-kicker", text: "Round 1 of 3 · Warm-up" }),
+      h("h2", { id: "r1h", text: "Stall or not a stall?" }),
+      h("p", { text: "You'll see six short scenes, one at a time. For each one, choose Stall or Not a stall." }),
+      h("p", { text: "One question helps: Is the next move yours, and is it not happening?" }));
+    center.replaceChildren(card, h("div", { class: "btn-row" }, h("button", { class: "btn", type: "button", onclick: () => go("r1"), text: "Begin Round 1" })));
+    bubbleRest("Six scenes. Some are pauses that are part of the work. Some are stalls.");
+  }
+
+  function viewR1() {
+    setRounds(1, 0);
+    const c = R1.find(x => x.id === S.order[S.i]);
+    const card = h("section", { class: "card", id: "sceneCard", "aria-labelledby": "sceneK" },
+      h("p", { class: "card-kicker", id: "sceneK", text: `Scene ${S.i + 1}` }),
+      h("p", { class: "scene", text: c.scene }));
+    const mk = (val, label) => {
+      const tried = S.r1Tried.includes(val);
+      const right = S.r1Done && val === c.stall;
+      const b = h("button", { class: "choice" + (tried ? " tried" : "") + (right ? " right" : ""), type: "button", "aria-pressed": right ? "true" : null },
+        label, tried ? h("span", { class: "tag", text: "Tried" }) : right ? h("span", { class: "tag", text: "✓ Your answer" }) : null);
+      b.addEventListener("click", () => answerR1(c, val));
+      if (S.r1Done) b.disabled = !right, b.setAttribute("aria-disabled", "true");
+      return b;
+    };
+    const pair = h("div", { class: "choice-pair", role: "group", "aria-label": "Is this a stall?" }, mk(true, "Stall"), mk(false, "Not a stall"));
+    center.replaceChildren(progress(R1.length, S.i, `Round 1 · Scene ${S.i + 1} of ${R1.length}`, "Scene"), card, pair);
+    if (S.r1Done) showR1Correct(c, false);
+    else if (S.r1Tried.length) showR1Retry(c);
+    else bubbleRest("Read the scene. Then choose Stall or Not a stall.");
+  }
+  function answerR1(c, val) {
+    if (S.r1Done) return;
+    if (val === c.stall) { S.r1Done = true; viewR1(); showR1Correct(c, true); }
+    else { if (!S.r1Tried.includes(val)) S.r1Tried.push(val); viewR1(); showR1Retry(c); }
+  }
+  function showR1Retry(c) {
+    feedback("retry", "Not quite. Try again.", [h("p", { class: "clue" }, h("b", { text: "Clue: " }), c.clue)]);
+  }
+  function showR1Correct(c, moveFocus) {
+    const last = S.i === R1.length - 1;
+    const next = h("button", { class: "btn", type: "button", text: last ? "Go to Round 2" : "Next scene", onclick: () => {
+      if (last) { go("r2intro"); }
+      else { S.i++; S.r1Tried = []; S.r1Done = false; render(); focusEl($("sceneCard")); }
+    } });
+    feedback("ok", "Yes.", [h("p", { text: c.fb })], moveFocus ? next : null);
+    if (!moveFocus) action.append(next);
+  }
+
+  function viewR2Intro() {
+    setRounds(2, 1);
+    const card = h("section", { class: "card", "aria-labelledby": "r2h" },
+      h("p", { class: "card-kicker", text: "Round 2 of 3 · Core round" }),
+      h("h2", { id: "r2h", text: "Tap the moment, then name the pattern" }),
+      h("p", { text: "You'll read seven short stories. The lines appear one at a time." }),
+      h("ul", { class: "intro-list" },
+        h("li", { text: "Step 1: Tap the line where the stall begins." }),
+        h("li", { text: "Step 2: Choose the kind of stall it is from seven patterns." })),
+      h("p", { text: "Some stories fit more than one pattern. If yours fits too, you'll see why." }));
+    center.replaceChildren(card, h("div", { class: "btn-row" }, h("button", { class: "btn", type: "button", onclick: () => { resetStory(); go("r2"); }, text: "Begin Round 2" })));
+    bubbleRest("Round 1 done. Now you'll look closer: where exactly does the stall begin?");
+  }
+  function resetStory() { S.shown = reduceMotion ? 5 : 1; S.step = 1; S.linesTried = []; S.lineHit = null; S.patTried = []; S.patHit = null; }
+
+  let revealTimer = null;
+  function stopReveal() { if (revealTimer) { clearTimeout(revealTimer); revealTimer = null; } }
+
+  function viewR2(newLine) {
+    setRounds(2, 1);
+    const st = R2[S.s];
+    const total = st.lines.length;
+    const list = h("ol", { class: "lines", id: "lines", "aria-label": "Story lines" });
+    st.lines.forEach((t, k) => {
+      if (k >= S.shown) return;
+      const tried = S.linesTried.includes(k);
+      const isHit = S.lineHit != null && (k === S.lineHit || k === st.stall);
+      let badge = null;
+      if (isHit) badge = k === st.stall ? "✓ Stall begins here" : "✓ Also fits";
+      else if (tried) badge = "Not this one";
+      const b = h("button", { type: "button", class: "line-btn" + (tried && !isHit ? " tried" : "") + (isHit ? " hit" : "") + (S.step > 1 ? " locked" : "") + (k === newLine && !reduceMotion ? " line-enter" : "") },
+        h("span", { class: "ln", "aria-hidden": "true", text: String(k + 1) }),
+        h("span", { text: t }),
+        badge ? h("span", { class: "badge", text: badge }) : null);
+      b.setAttribute("aria-label", `Line ${k + 1}: ${t}${badge ? ". " + badge : ""}`);
+      if (S.step > 1) b.setAttribute("aria-disabled", "true");
+      b.addEventListener("click", () => pickLine(k));
+      list.append(h("li", null, b));
+    });
+    const prompt1 = h("p", { class: "step-prompt" }, h("span", { class: "step-num", text: "Step 1" }), h("span", { text: "Tap the line where the stall begins." }));
+    const card = h("section", { class: "card", id: "storyCard", "aria-labelledby": "storyH" },
+      h("p", { class: "card-kicker", text: `Story ${S.s + 1} of ${R2.length}` }),
+      h("h2", { id: "storyH", text: st.title }),
+      prompt1, list,
+      S.shown < total ? h("button", { class: "show-all", type: "button", text: "Show all lines now", onclick: () => { S.shown = total; viewR2(); $("lines").querySelector("button")?.focus(); } }) : null);
+    const kids = [progress(R2.length, S.s, `Round 2 · Story ${S.s + 1} of ${R2.length}`, "Story"), card];
+
+    if (S.step >= 2) {
+      const grid = h("div", { class: "patterns", role: "group", "aria-labelledby": "patH" });
+      PATTERNS.forEach(p => {
+        const tried = S.patTried.includes(p.id);
+        const hit = S.patHit === p.id;
+        const b = h("button", { type: "button", class: "pattern" + (tried ? " tried" : "") + (hit ? " hit" : "") },
+          h("strong", { text: p.name }), h("span", { text: p.def }),
+          hit ? h("span", { class: "badge", text: "✓ Your answer" }) : tried ? h("span", { class: "badge", text: "Tried" }) : null);
+        if (S.step > 2) b.setAttribute("aria-disabled", "true");
+        b.addEventListener("click", () => pickPattern(p.id));
+        grid.append(b);
+      });
+      kids.push(h("div", { style: "display:grid;gap:12px" },
+        h("p", { class: "step-prompt", style: "margin:0" }, h("span", { class: "step-num", text: "Step 2" }), h("span", { class: "section-h", id: "patH", text: "What kind of stall is this?" })),
+        grid));
+    }
+    center.replaceChildren(...kids);
+
+    if (S.shown < total && !revealTimer) {
+      revealTimer = setTimeout(() => { revealTimer = null; S.shown++; const f = document.activeElement; const fid = f && f.closest("#lines") ? [...$("lines").querySelectorAll("button")].indexOf(f) : -1; viewR2(S.shown - 1); if (fid >= 0) $("lines").querySelectorAll("button")[fid]?.focus(); }, 1100);
+    }
+    if (!fb.childElementCount && S.step === 1 && !S.linesTried.length) bubbleRest("Read each line as it appears. Then tap the line where the task stops moving forward.");
+  }
+  function pickLine(k) {
+    if (S.step !== 1) return;
+    const st = R2[S.s];
+    if (k === st.stall || (st.altLines && st.altLines[k])) {
+      S.lineHit = k; S.step = 2; S.shown = st.lines.length;
+      viewR2();
+      const parts = [h("p", { text: "This is the line where the stall begins." })];
+      if (k !== st.stall) parts.splice(0, 1, h("p", { class: "note" }, h("b", { text: "Also fits" }), st.altLines[k]));
+      parts.push(h("p", { text: "Now choose the kind of stall it is." }));
+      const go2 = h("button", { class: "btn ghost", type: "button", text: "Go to Step 2", onclick: () => center.querySelector(".patterns button")?.focus() });
+      feedback("ok", "Yes.", parts, go2);
+    } else {
+      if (!S.linesTried.includes(k)) S.linesTried.push(k);
+      viewR2();
+      feedback("retry", "Not quite. Try again.", [h("p", { class: "clue" }, h("b", { text: "Clue: " }), LINE_CLUE)]);
+      $("lines").querySelectorAll("button")[k]?.focus();
+    }
+  }
+  function pickPattern(id) {
+    if (S.step !== 2) return;
+    const st = R2[S.s];
+    const alt = st.altPattern && st.altPattern[id];
+    if (id === st.pattern || alt) {
+      S.patHit = id; S.step = 3;
+      viewR2();
+      const parts = [];
+      if (alt) parts.push(h("p", { class: "note" }, h("b", { text: "Also fits" }), alt),
+                         h("p", { text: `The pattern most people see here is ${P[st.pattern].name}. ${st.fb}` }));
+      else parts.push(h("p", { text: `${P[st.pattern].name}. ${st.fb}` }));
+      const last = S.s === R2.length - 1;
+      const next = h("button", { class: "btn", type: "button", text: last ? "Go to Round 3" : "Next story", onclick: () => {
+        if (last) go("r3");
+        else { S.s++; resetStory(); fb.replaceChildren(); render(); focusEl($("storyH")); }
+      } });
+      feedback("ok", "Yes.", parts, next);
+    } else {
+      if (!S.patTried.includes(id)) S.patTried.push(id);
+      viewR2();
+      const line = st.lines[st.stall];
+      feedback("retry", "Not quite. Try again.", [
+        h("p", { class: "clue" }, h("b", { text: "Clue: " }), `Read the stall line again: “${line}” What is getting in the way right there?`)
+      ]);
+      [...center.querySelectorAll(".patterns button")][PATTERNS.findIndex(p => p.id === id)]?.focus();
+    }
+  }
+
+  function viewR3(msg) {
+    setRounds(3, 2);
+    const list = h("ul", { class: "picks" });
+    R3.forEach(c => {
+      const inp = h("input", { type: "checkbox", id: "pick-" + c.id, value: c.id });
+      inp.checked = S.picks.includes(c.id);
+      inp.addEventListener("change", () => {
+        if (inp.checked) {
+          if (c.id === "unsure") S.picks = ["unsure"];
+          else S.picks = S.picks.filter(x => x !== "unsure").concat(c.id);
+        } else S.picks = S.picks.filter(x => x !== c.id);
+        list.querySelectorAll("input").forEach(i => { i.checked = S.picks.includes(i.value); });
+        const m = $("r3msg"); if (m) m.remove();
+      });
+      list.append(h("li", null, h("label", { class: "pick", for: "pick-" + c.id }, inp,
+        h("span", { class: "pick-text" }, h("span", { text: c.text }), c.id !== "unsure" ? h("span", { class: "pname", text: P[c.id].name }) : null))));
+    });
+    const dl = h("dl");
+    PATTERNS.forEach(p => dl.append(h("dt", { text: p.name }), h("dd", { text: p.def })));
+    const card = h("section", { class: "card", "aria-labelledby": "r3h" },
+      h("p", { class: "card-kicker", text: "Round 3 of 3 · Takeaway" }),
+      h("h2", { id: "r3h", text: "My stall snapshot" }),
+      h("p", { text: "Which of these have shown up for you lately? Pick any that fit. There are no wrong answers." }));
+    const fs = h("fieldset", { style: "border:0;margin:0;padding:0;min-width:0;display:grid;gap:12px" },
+      h("legend", { class: "sr-only", text: "Which of these have shown up for you lately?" }), list);
+    center.replaceChildren(card, fs,
+      h("details", { class: "ref" }, h("summary", { text: "Show all seven patterns as a reference" }), dl),
+      msg ? h("p", { class: "inline-msg", id: "r3msg", role: "status", text: msg }) : null,
+      h("div", { class: "btn-row" }, h("button", { class: "btn", type: "button", text: "Make my snapshot", onclick: () => {
+        if (!S.picks.length) { viewR3("Pick at least one, or choose “Not sure yet.”"); $("r3msg")?.focus?.(); return; }
+        S.snapDate = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+        savePicks();
+        go("snapshot");
+      } })));
+    bubbleRest("This round is just for you. Nothing here is checked or graded.");
+  }
+
+  function snapItems() {
+    return S.picks.includes("unsure")
+      ? [{ name: "Not sure yet", def: "That's fine. You can notice which patterns show up as you go." }]
+      : PATTERNS.filter(p => S.picks.includes(p.id)).map(p => ({ name: p.name, def: p.def }));
+  }
+  function viewSnapshot() {
+    setRounds(3, 2);
+    const items = snapItems();
+    const card = h("section", { class: "card snap", id: "snapCard", "aria-labelledby": "snapH" },
+      h("p", { class: "card-kicker", text: "Spot the Stall · M1L1" }),
+      h("h2", { id: "snapH", text: "My stall snapshot" }),
+      h("p", { class: "snap-date", text: S.snapDate || "" }),
+      h("ul", { class: "snap-list" }, items.map(it => h("li", null, h("strong", { text: it.name }), h("span", { text: it.def })))),
+      h("p", { class: "snap-foot", text: "These are the stalls you've noticed lately. Naming them is the first step." }));
+    const status = h("p", { class: "status", id: "saveStatus", role: "status" });
+    const saveBtn = h("button", { class: "btn ghost", type: "button", text: "Save as image", onclick: () => saveImage(items, status) });
+    const copyBtn = h("button", { class: "btn ghost", type: "button", text: "Copy as text", onclick: () => copyText(items, status) });
+    const printBtn = standalone ? h("button", { class: "btn ghost", type: "button", text: "Print", onclick: () => { document.body.classList.add("printing-snap"); window.print(); } }) : null;
+    center.replaceChildren(card,
+      h("div", { class: "btn-row" }, saveBtn, copyBtn, printBtn),
+      status,
+      h("div", { class: "btn-row" },
+        h("button", { class: "btn ghost", type: "button", text: "Change my picks", onclick: () => go("r3") }),
+        h("button", { class: "btn", type: "button", text: "Finish", onclick: () => go("closing") })));
+    bubbleRest("Here's your snapshot. This browser remembers it, but nothing is sent anywhere. To keep a copy, save it as an image, print it, or copy the text.");
+  }
+  function snapText(items) {
+    return ["My stall snapshot", S.snapDate || "", ""].concat(items.map(it => `${it.name}: ${it.def}`)).join("\n").trim();
+  }
+  async function copyText(items, status) {
+    const t = snapText(items);
+    try { await navigator.clipboard.writeText(t); status.textContent = "Copied. You can paste it anywhere."; }
+    catch (e) {
+      const ta = h("textarea", { "aria-label": "Snapshot text", rows: "8", style: "width:100%;font:inherit;padding:10px;border-radius:8px" });
+      ta.value = t; status.replaceChildren("Copying isn't available here. Select the text below and copy it.", ta);
+      ta.focus(); ta.select();
+    }
+  }
+  function drawSnapshot(items) {
+    const css = getComputedStyle(document.documentElement);
+    const W = 1200, pad = 90, scale = 2;
+    const c = document.createElement("canvas");
+    const ctx = c.getContext("2d");
+    const display = "700 54px " + css.getPropertyValue("--font-display");
+    const nameF = "700 34px " + css.getPropertyValue("--font-display");
+    const bodyF = "400 27px " + css.getPropertyValue("--font-body");
+    const smallF = "700 20px " + css.getPropertyValue("--font-body");
+    function wrap(text, font, maxW) {
+      ctx.font = font; const words = text.split(" "); const out = []; let line = "";
+      for (const w of words) { const t = line ? line + " " + w : w; if (ctx.measureText(t).width > maxW && line) { out.push(line); line = w; } else line = t; }
+      if (line) out.push(line); return out;
+    }
+    const maxW = W - pad * 2 - 40;
+    let H = 250;
+    const blocks = items.map(it => ({ name: wrap(it.name, nameF, maxW), def: wrap(it.def, bodyF, maxW) }));
+    blocks.forEach(b => { H += b.name.length * 44 + b.def.length * 38 + 34; });
+    H += 40;
+    c.width = W * scale; c.height = H * scale; ctx.scale(scale, scale);
+    // Light, printable palette regardless of theme
+    ctx.fillStyle = "#E6ECF1"; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#FFFFFF"; roundRect(ctx, 40, 40, W - 80, H - 80, 18); ctx.fill();
+    const x = pad;
+    ctx.fillStyle = "#4A5665"; ctx.font = smallF; ctx.fillText("SPOT THE STALL · M1L1", x, 104);
+    ctx.fillStyle = "#18212C"; ctx.font = display; ctx.fillText("My stall snapshot", x, 170);
+    ctx.fillStyle = "#4A5665"; ctx.font = bodyF; ctx.fillText(S.snapDate || "", x, 214);
+    let y = 280;
+    blocks.forEach(b => {
+      ctx.fillStyle = "#2B4BA0"; ctx.font = nameF; b.name.forEach(l => { ctx.fillText(l, x, y); y += 44; });
+      ctx.fillStyle = "#4A5665"; ctx.font = bodyF; b.def.forEach(l => { ctx.fillText(l, x, y); y += 38; });
+      y += 34;
+    });
+    return c;
+  }
+  function roundRect(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+  async function saveImage(items, status) {
+    status.textContent = "Preparing your image…";
+    try { await document.fonts.ready; } catch (e) {}
+    const canvas = drawSnapshot(items);
+    const blob = await new Promise(r => canvas.toBlob(r, "image/png"));
+    const filename = "my-stall-snapshot.png";
+    if (downloads) {
+      try { await downloads.save({ filename, data: blob }); status.textContent = "Saved."; }
+      catch (e) {
+        if (e && e.code === "declined") status.textContent = "Not saved. You can try again anytime.";
+        else if (e && e.code === "rate_limited") status.textContent = "A save is already waiting for you. Finish that one first.";
+        else showImageFallback(canvas, status);
+      }
+      return;
+    }
+    if (standalone) {
+      const a = h("a", { href: URL.createObjectURL(blob), download: filename });
+      document.body.append(a); a.click(); a.remove();
+      status.textContent = "Saved to your downloads.";
+      return;
+    }
+    showImageFallback(canvas, status);
+  }
+  function showImageFallback(canvas, status) {
+    const img = h("img", { src: canvas.toDataURL("image/png"), alt: "My stall snapshot, as an image", style: "display:block;width:100%;border-radius:8px;margin-top:8px" });
+    status.replaceChildren("Here's your snapshot as an image. Right-click it, or press and hold on a phone, to save it.", img);
+  }
+
+  function viewClosing() {
+    setRounds(0, 3);
+    const card = h("section", { class: "card", "aria-labelledby": "endH" },
+      h("p", { class: "card-kicker", text: "All three rounds complete" }),
+      h("h2", { id: "endH", class: "sr-only", text: "You finished Spot the Stall" }),
+      h("p", { class: "closing", text: CLOSING }));
+    center.replaceChildren(card, h("div", { class: "btn-row" },
+      h("button", { class: "btn ghost", type: "button", text: "See my snapshot again", onclick: () => go("snapshot") }),
+      h("button", { class: "btn ghost", type: "button", text: "Play again", onclick: () => { S = freshState(); go("welcome"); } })));
+    bubbleRest("You've finished. Come back to the snapshot anytime you want a reminder.");
+  }
+
+  window.addEventListener("afterprint", () => document.body.classList.remove("printing-snap"));
+
+  /* ---------- Saved picks (this browser only) ---------- */
+  const STORE = "spot-the-stall:snapshot";
+  function savePicks() {
+    try { localStorage.setItem(STORE, JSON.stringify({ picks: S.picks, date: S.snapDate })); } catch (e) {}
+  }
+  function loadPicks() {
+    try { const d = JSON.parse(localStorage.getItem(STORE) || "null"); if (d && Array.isArray(d.picks)) return d; } catch (e) {}
+    return null;
+  }
+
+  /* ---------- Runtime hooks ---------- */
+  const standalone = !window.claude;
+  let downloads = null;
+  if (window.claude && typeof window.claude.use === "function") {
+    window.claude.use("downloads").then(d => { downloads = d; }).catch(() => {});
+  }
+
+  function start(data) {
+    S = data && data.S && data.S.view ? Object.assign(freshState(), data.S) : freshState();
+    if (S.view === "r2" && S.shown < 5 && reduceMotion) S.shown = 5;
+    render();
+  }
+  if (window.claude?.hot?.snapshot) window.claude.hot.snapshot(() => ({ S }));
+  window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+})();
+</script>
+<script>
+/* Reports the game's height to the WordPress page so the embed fits without scrollbars. */
+(function () {
+  if (window.parent === window) return;
+  var wrap = document.querySelector(".wrap"), last = 0;
+  function send() {
+    var cs = getComputedStyle(document.body);
+    var h = Math.ceil(wrap.getBoundingClientRect().height + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom));
+    if (Math.abs(h - last) > 2) { last = h; window.parent.postMessage({ type: "spot-the-stall-height", height: h }, "*"); }
+  }
+  new ResizeObserver(send).observe(wrap);
+  window.addEventListener("load", send);
+})();
+</script>
+</body>
+</html>
