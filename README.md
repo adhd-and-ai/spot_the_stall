@@ -21,7 +21,7 @@ The whole game is one file, `index.html`. It's a static site with no server and 
 1. In the repository, go to **Settings > Pages**.
 2. Under **Build and deployment**, set **Source** to **Deploy from a branch**.
 3. Choose the `main` branch and the `/ (root)` folder, then select **Save**.
-4. After a minute or two, the game is live at https://acamere2.github.io/spot_the_stall/.
+4. After a minute or two, the game is live at https://adhd-and-ai.github.io/spot_the_stall/.
 
 ## Updating the game
 
