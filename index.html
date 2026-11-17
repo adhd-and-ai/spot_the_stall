@@ -106,6 +106,22 @@ body {
 
 .progress { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .progress-label { font-size: .9375rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.progress-meta { display: grid; gap: 2px; }
+.tally { font-size: .9375rem; font-weight: 700; color: var(--ok); font-variant-numeric: tabular-nums; }
+.tally::before { content: "\2713\00a0"; }
+.results { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; margin-top: 4px; }
+.results caption { text-align: left; color: var(--muted); font-size: .9375rem; padding-bottom: 8px; }
+.results th, .results td { text-align: left; padding: 12px 0; border-bottom: 1.5px solid var(--rule); vertical-align: top; }
+.results th { font-weight: 400; padding-right: 16px; }
+.results th b { display: block; font-family: var(--font-display); font-size: 1.0625rem; }
+.results th span, .results td span { display: block; color: var(--muted); font-size: .9375rem; }
+.results td { text-align: right; min-width: 7.5em; }
+.results td strong { white-space: nowrap; }
+.results td strong { font-size: 1.25rem; }
+.results tfoot th, .results tfoot td { border-bottom: 0; border-top: 3px solid var(--ink); }
+.results tfoot td strong { font-size: 1.5rem; }
+.end-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; }
+.end-row p { margin: 0; color: var(--muted); }
 .dots { display: flex; gap: 8px; list-style: none; margin: 0; padding: 0; }
 .dots li { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--muted); background: transparent; }
 .dots li.done { background: var(--accent); border-color: var(--accent); }
@@ -258,6 +274,7 @@ details.ref dd { margin: 0; color: var(--muted); }
 /* Closing */
 .closing { font-family: var(--font-display); font-size: clamp(1.35rem, 3vw, 1.75rem); line-height: 1.35; font-weight: 500; margin: 0; text-wrap: pretty; }
 
+@media (max-width: 480px) { .card { padding: 20px 18px 22px; } .results th { padding-right: 10px; } }
 @media print {
   :root, :root[data-theme="dark"], :root:not([data-theme="light"]) {
     --bg: #FFFFFF; --card: #FFFFFF; --ink: #000000; --muted: #333333; --accent: #1F3A85; color-scheme: light;
@@ -384,7 +401,8 @@ details.ref dd { margin: 0; color: var(--muted); }
       i: 0,
       r1Tried: [], r1Done: false,
       s: 0, shown: 0, step: 1, linesTried: [], lineHit: null, patTried: [], patHit: null,
-      picks: [], snapDate: null
+      picks: [], snapDate: null,
+      tally: { r1: 0, r2line: 0, r2pat: 0 }
     };
   }
   function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
@@ -414,11 +432,13 @@ details.ref dd { margin: 0; color: var(--muted); }
       if (n <= doneUpTo) li.append(h("span", { class: "sr-only", text: ", complete" }));
     });
   }
-  function progress(total, idx, label, noun) {
+  function progress(total, idx, label, noun, tally) {
     const ol = h("ol", { class: "dots", "aria-hidden": "true" });
     for (let k = 0; k < total; k++) ol.append(h("li", { class: k < idx ? "done" : k === idx ? "current" : "" }));
     return h("div", { class: "progress" },
-      h("span", { class: "progress-label", text: label }),
+      h("div", { class: "progress-meta" },
+        h("span", { class: "progress-label", text: label }),
+        tally ? h("span", { class: "tally", text: tally }) : null),
       ol,
       h("span", { class: "sr-only", text: `${noun} ${idx + 1} of ${total}` }));
   }
@@ -495,14 +515,14 @@ details.ref dd { margin: 0; color: var(--muted); }
       return b;
     };
     const pair = h("div", { class: "choice-pair", role: "group", "aria-label": "Is this a stall?" }, mk(true, "Stall"), mk(false, "Not a stall"));
-    center.replaceChildren(progress(R1.length, S.i, `Round 1 · Scene ${S.i + 1} of ${R1.length}`, "Scene"), card, pair);
+    center.replaceChildren(progress(R1.length, S.i, `Round 1 · Scene ${S.i + 1} of ${R1.length}`, "Scene", `${S.tally.r1} on the first try`), card, pair);
     if (S.r1Done) showR1Correct(c, false);
     else if (S.r1Tried.length) showR1Retry(c);
     else bubbleRest("Read the scene. Then choose Stall or Not a stall.");
   }
   function answerR1(c, val) {
     if (S.r1Done) return;
-    if (val === c.stall) { S.r1Done = true; viewR1(); showR1Correct(c, true); }
+    if (val === c.stall) { if (!S.r1Tried.length) S.tally.r1++; S.r1Done = true; viewR1(); showR1Correct(c, true); }
     else { if (!S.r1Tried.includes(val)) S.r1Tried.push(val); viewR1(); showR1Retry(c); }
   }
   function showR1Retry(c) {
@@ -563,7 +583,7 @@ details.ref dd { margin: 0; color: var(--muted); }
       h("h2", { id: "storyH", text: st.title }),
       prompt1, list,
       S.shown < total ? h("button", { class: "show-all", type: "button", text: "Show all lines now", onclick: () => { S.shown = total; viewR2(); $("lines").querySelector("button")?.focus(); } }) : null);
-    const kids = [progress(R2.length, S.s, `Round 2 · Story ${S.s + 1} of ${R2.length}`, "Story"), card];
+    const kids = [progress(R2.length, S.s, `Round 2 · Story ${S.s + 1} of ${R2.length}`, "Story", `First try: ${S.tally.r2line} ${S.tally.r2line === 1 ? "line" : "lines"}, ${S.tally.r2pat} ${S.tally.r2pat === 1 ? "pattern" : "patterns"}`), card];
 
     if (S.step >= 2) {
       const grid = h("div", { class: "patterns", role: "group", "aria-labelledby": "patH" });
@@ -592,6 +612,7 @@ details.ref dd { margin: 0; color: var(--muted); }
     if (S.step !== 1) return;
     const st = R2[S.s];
     if (k === st.stall || (st.altLines && st.altLines[k])) {
+      if (!S.linesTried.length) S.tally.r2line++;
       S.lineHit = k; S.step = 2; S.shown = st.lines.length;
       viewR2();
       const parts = [h("p", { text: "This is the line where the stall begins." })];
@@ -611,6 +632,7 @@ details.ref dd { margin: 0; color: var(--muted); }
     const st = R2[S.s];
     const alt = st.altPattern && st.altPattern[id];
     if (id === st.pattern || alt) {
+      if (!S.patTried.length) S.tally.r2pat++;
       S.patHit = id; S.step = 3;
       viewR2();
       const parts = [];
@@ -775,14 +797,37 @@ details.ref dd { margin: 0; color: var(--muted); }
 
   function viewClosing() {
     setRounds(0, 3);
+    const t = S.tally, nR1 = R1.length, nR2 = R2.length;
+    const total = t.r1 + t.r2line + t.r2pat, max = nR1 + nR2 * 2;
+    const nPicks = S.picks.includes("unsure") ? 0 : S.picks.length;
+    const after = (n, of) => of - n === 0 ? "All on the first try" : `${of - n} after a clue`;
+    const row = (title, sub, n, of) => h("tr", null,
+      h("th", { scope: "row" }, h("b", { text: title }), h("span", { text: sub })),
+      h("td", null, h("strong", { text: `${n} of ${of}` }), h("span", { text: after(n, of) })));
+    const table = h("table", { class: "results" },
+      h("caption", { text: "Answers found on the first try. Every answer found after a clue still counts as done." }),
+      h("tbody", null,
+        row("Round 1", "Stall or not a stall?", t.r1, nR1),
+        row("Round 2, Step 1", "Tap the moment", t.r2line, nR2),
+        row("Round 2, Step 2", "Name the pattern", t.r2pat, nR2),
+        h("tr", null,
+          h("th", { scope: "row" }, h("b", { text: "Round 3" }), h("span", { text: "My stall snapshot" })),
+          h("td", null, h("strong", { text: nPicks ? `${nPicks} ${nPicks === 1 ? "pattern" : "patterns"}` : "Not sure yet" }), h("span", { text: "No right or wrong answers" })))),
+      h("tfoot", null, h("tr", null,
+        h("th", { scope: "row" }, h("b", { text: "Total" }), h("span", { text: "Rounds 1 and 2" })),
+        h("td", null, h("strong", { text: `${total} of ${max}` }), h("span", { text: "on the first try" })))));
     const card = h("section", { class: "card", "aria-labelledby": "endH" },
       h("p", { class: "card-kicker", text: "All three rounds complete" }),
-      h("h2", { id: "endH", class: "sr-only", text: "You finished Spot the Stall" }),
-      h("p", { class: "closing", text: CLOSING }));
-    center.replaceChildren(card, h("div", { class: "btn-row" },
-      h("button", { class: "btn ghost", type: "button", text: "See my snapshot again", onclick: () => go("snapshot") }),
-      h("button", { class: "btn ghost", type: "button", text: "Play again", onclick: () => { S = freshState(); go("welcome"); } })));
-    bubbleRest("You've finished. Come back to the snapshot anytime you want a reminder.");
+      h("h2", { id: "endH", text: "Your results" }),
+      table);
+    const closing = h("section", { class: "card", "aria-label": "Closing" }, h("p", { class: "closing", text: CLOSING }));
+    center.replaceChildren(card, closing,
+      h("div", { class: "end-row" },
+        h("button", { class: "btn", type: "button", text: "Start the activity again", onclick: () => { S = freshState(); go("welcome"); } }),
+        h("p", { text: "You can close this tab." })),
+      h("div", { class: "btn-row" },
+        h("button", { class: "btn ghost", type: "button", text: "See my snapshot again", onclick: () => go("snapshot") })));
+    bubbleRest("You've finished. Your snapshot is saved in this browser, so you can come back to it anytime.");
   }
 
   window.addEventListener("afterprint", () => document.body.classList.remove("printing-snap"));
