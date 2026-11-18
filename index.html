@@ -711,7 +711,7 @@ details.ref dd { margin: 0; color: var(--muted); }
       h("legend", { class: "sr-only", text: "Which of these have shown up for you lately?" }), list);
     center.replaceChildren(card, fs,
       h("details", { class: "ref" }, h("summary", { text: "Show all seven patterns as a reference" }), dl),
-      msg ? h("p", { class: "inline-msg", id: "r3msg", role: "status", text: msg }) : null,
+      h("p", { class: "inline-msg", id: "r3msg", role: "status", hidden: !msg, text: msg || "" }),
       h("div", { class: "btn-row" }, h("button", { class: "btn", type: "button", text: "Make my snapshot", onclick: () => {
         if (!S.picks.length) { viewR3("Pick at least one, or choose “Not sure yet.”"); $("r3msg")?.focus?.(); return; }
         S.snapDate = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
