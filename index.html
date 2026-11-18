@@ -370,7 +370,7 @@ details.ref dd { margin: 0; color: var(--muted); }
       fb: "This is not a stall. The next move belongs to someone else.", clue: "Ask yourself whose move comes next. A stall is when the next move is yours." },
     { id: 4, scene: "The laundry has been in the basket since Sunday. You walk past it every day and think, “Later.”", stall: true,
       fb: "This is a stall. “Later” keeps repeating, and the task hasn't moved.", clue: "Notice how many times “Later” has come up, and whether the task has moved." },
-    { id: 5, scene: "You look at your list and move the closet cleanup to next month, because this week is full.", stall: false,
+    { id: 5, scene: "You look at your list and move the closet cleanup to next month because this week is full.", stall: false,
       fb: "This is not a stall. This was a choice made on purpose, with a new date.", clue: "Notice whether the task got a new date on purpose." },
     { id: 6, scene: "You need to reply to a message. You've opened it four times today and closed it each time.", stall: true,
       fb: "This is a stall. You keep arriving at the task without beginning it.", clue: "Count how many times you've opened the message, and what happened each time." }
@@ -424,6 +424,7 @@ details.ref dd { margin: 0; color: var(--muted); }
     return {
       view: "welcome", // welcome | r1intro | r1 | r2intro | r2 | r3 | snapshot | closing
       order: shuffle(R1.map(c => c.id)),
+      r2order: shuffle(R2.map((_, k) => k)),
       i: 0,
       r1Tried: [], r1Done: false,
       s: 0, shown: 0, step: 1, linesTried: [], lineHit: null, patTried: [], patHit: null,
@@ -586,7 +587,7 @@ details.ref dd { margin: 0; color: var(--muted); }
 
   function viewR2(newLine) {
     setRounds(2, 1);
-    const st = R2[S.s];
+    const st = R2[S.r2order[S.s]];
     const total = st.lines.length;
     const list = h("ol", { class: "lines", id: "lines", "aria-label": "Story lines" });
     st.lines.forEach((t, k) => {
@@ -638,7 +639,7 @@ details.ref dd { margin: 0; color: var(--muted); }
   }
   function pickLine(k) {
     if (S.step !== 1) return;
-    const st = R2[S.s];
+    const st = R2[S.r2order[S.s]];
     if (k === st.stall || (st.altLines && st.altLines[k])) {
       if (!S.linesTried.length) S.tally.r2line++;
       S.lineHit = k; S.step = 2; S.shown = st.lines.length;
@@ -657,7 +658,7 @@ details.ref dd { margin: 0; color: var(--muted); }
   }
   function pickPattern(id) {
     if (S.step !== 2) return;
-    const st = R2[S.s];
+    const st = R2[S.r2order[S.s]];
     const alt = st.altPattern && st.altPattern[id];
     if (id === st.pattern || alt) {
       if (!S.patTried.length) S.tally.r2pat++;
