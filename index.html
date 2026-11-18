@@ -78,6 +78,17 @@ body {
 .eyebrow { font-size: .8125rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
 .brand h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.75rem, 4vw, 2.25rem); line-height: 1.1; margin: 0; letter-spacing: -.01em; }
 
+.top-right { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+@media (max-width: 600px) { .top-right { align-items: flex-start; } }
+.game-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn.small { font-size: .9375rem; min-height: 44px; padding: 8px 16px; }
+dialog.confirm {
+  border: 0; border-radius: 14px; padding: 24px; max-width: min(28rem, calc(100vw - 32px));
+  background: var(--card); color: var(--ink); box-shadow: 0 12px 48px rgba(0,0,0,.3);
+}
+dialog.confirm::backdrop { background: rgba(13,18,24,.55); }
+dialog.confirm h2 { font-family: var(--font-display); font-size: 1.375rem; margin: 0 0 8px; }
+dialog.confirm p { margin: 0 0 20px; color: var(--muted); }
 .rounds { display: flex; gap: 6px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
 .rounds li {
   font-size: .875rem; padding: 6px 12px; border-radius: 999px;
@@ -297,14 +308,29 @@ details.ref dd { margin: 0; color: var(--muted); }
       <span class="eyebrow">ADHD and AI &middot; Module 1, Lesson 1</span>
       <h1>Spot the Stall</h1>
     </div>
-    <nav aria-label="Rounds">
-      <ol class="rounds" id="rounds">
-        <li data-r="1">Round 1</li>
-        <li data-r="2">Round 2</li>
-        <li data-r="3">Round 3</li>
-      </ol>
-    </nav>
+    <div class="top-right">
+      <nav aria-label="Rounds">
+        <ol class="rounds" id="rounds">
+          <li data-r="1">Round 1</li>
+          <li data-r="2">Round 2</li>
+          <li data-r="3">Round 3</li>
+        </ol>
+      </nav>
+      <div class="game-controls" id="gameControls" hidden>
+        <button class="btn ghost small" type="button" id="btnStartOver">Start over</button>
+        <button class="btn ghost small" type="button" id="btnExit">Exit game</button>
+      </div>
+    </div>
   </header>
+
+  <dialog class="confirm" id="confirmDlg" aria-labelledby="confirmH" aria-describedby="confirmP">
+    <h2 id="confirmH"></h2>
+    <p id="confirmP"></p>
+    <div class="btn-row">
+      <button class="btn ghost" type="button" id="confirmCancel">Keep playing</button>
+      <button class="btn" type="button" id="confirmOk"></button>
+    </div>
+  </dialog>
 
   <main class="stage">
     <div class="center" id="center"></div>
@@ -459,6 +485,7 @@ details.ref dd { margin: 0; color: var(--muted); }
   function render() {
     stopReveal();
     const v = S.view;
+    $("gameControls").hidden = !["r1intro", "r1", "r2intro", "r2", "r3", "snapshot"].includes(v);
     if (v === "welcome") return viewWelcome();
     if (v === "r1intro") return viewR1Intro();
     if (v === "r1") return viewR1();
@@ -467,6 +494,7 @@ details.ref dd { margin: 0; color: var(--muted); }
     if (v === "r3") return viewR3();
     if (v === "snapshot") return viewSnapshot();
     if (v === "closing") return viewClosing();
+    if (v === "exited") return viewExited();
   }
   function go(view) { S.view = view; render(); const t = center.querySelector("h2"); focusEl(t); }
 
@@ -829,6 +857,37 @@ details.ref dd { margin: 0; color: var(--muted); }
         h("button", { class: "btn ghost", type: "button", text: "See my snapshot again", onclick: () => go("snapshot") })));
     bubbleRest("You've finished. Your snapshot is saved in this browser, so you can come back to it anytime.");
   }
+
+  function viewExited() {
+    setRounds(0, 0);
+    const card = h("section", { class: "card", "aria-labelledby": "exitH" },
+      h("p", { class: "card-kicker", text: "Game ended" }),
+      h("h2", { id: "exitH", text: "You've left the game" }),
+      h("p", { text: "You can come back and play anytime. Any snapshot you made is still saved in this browser." }));
+    center.replaceChildren(card,
+      h("div", { class: "end-row" },
+        h("button", { class: "btn", type: "button", text: "Start the activity again", onclick: () => { S = freshState(); go("welcome"); } }),
+        h("p", { text: "You can close this tab." })));
+    bubbleRest("Thanks for playing. Close this tab to go back to your course.");
+  }
+
+  /* ---------- Start over and Exit, with a confirmation step ---------- */
+  const dlg = $("confirmDlg");
+  let onConfirm = null;
+  function ask(title, body, okLabel, fn) {
+    $("confirmH").textContent = title; $("confirmP").textContent = body; $("confirmOk").textContent = okLabel;
+    onConfirm = fn;
+    if (typeof dlg.showModal === "function") { dlg.showModal(); $("confirmCancel").focus(); }
+    else fn();
+  }
+  $("confirmCancel").addEventListener("click", () => dlg.close());
+  $("confirmOk").addEventListener("click", () => { dlg.close(); const f = onConfirm; onConfirm = null; if (f) f(); });
+  $("btnStartOver").addEventListener("click", () => ask("Start over?",
+    "This clears your answers in this game and takes you back to the beginning.", "Start over",
+    () => { S = freshState(); go("welcome"); }));
+  $("btnExit").addEventListener("click", () => ask("Exit the game?",
+    "Your answers in this game won't be kept. Any snapshot you already made stays saved in this browser.", "Exit game",
+    () => { S.view = "exited"; go("exited"); }));
 
   window.addEventListener("afterprint", () => document.body.classList.remove("printing-snap"));
 
