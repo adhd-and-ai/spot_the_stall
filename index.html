@@ -424,13 +424,20 @@ details.ref dd { margin: 0; color: var(--muted); }
     return {
       view: "welcome", // welcome | r1intro | r1 | r2intro | r2 | r3 | snapshot | closing
       order: shuffle(R1.map(c => c.id)),
-      r2order: shuffle(R2.map((_, k) => k)),
+      r2order: pickStories(),
       i: 0,
       r1Tried: [], r1Done: false,
       s: 0, shown: 0, step: 1, linesTried: [], lineHit: null, patTried: [], patHit: null,
       picks: [], snapDate: null,
       tally: { r1: 0, r2line: 0, r2pat: 0 }
     };
+  }
+  // Round 2 uses 4 of the 7 stories. "The message" is always one of them,
+  // because it is the story that shows the "This one fits too" feedback.
+  const R2_COUNT = 4, R2_ALWAYS = 2;
+  function pickStories() {
+    const others = shuffle(R2.map((_, k) => k).filter(k => k !== R2_ALWAYS)).slice(0, R2_COUNT - 1);
+    return shuffle([R2_ALWAYS, ...others]);
   }
   function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
@@ -572,7 +579,7 @@ details.ref dd { margin: 0; color: var(--muted); }
     const card = h("section", { class: "card", "aria-labelledby": "r2h" },
       h("p", { class: "card-kicker", text: "Round 2 of 3 · Core round" }),
       h("h2", { id: "r2h", text: "Tap the moment, then name the pattern" }),
-      h("p", { text: "You'll read seven short stories. The lines appear one at a time." }),
+      h("p", { text: "You'll read four short stories. The lines appear one at a time." }),
       h("ul", { class: "intro-list" },
         h("li", { text: "Step 1: Tap the line where the stall begins." }),
         h("li", { text: "Step 2: Choose the kind of stall it is from seven patterns." })),
@@ -608,11 +615,11 @@ details.ref dd { margin: 0; color: var(--muted); }
     });
     const prompt1 = h("p", { class: "step-prompt" }, h("span", { class: "step-num", text: "Step 1" }), h("span", { text: "Tap the line where the stall begins." }));
     const card = h("section", { class: "card", id: "storyCard", "aria-labelledby": "storyH" },
-      h("p", { class: "card-kicker", text: `Story ${S.s + 1} of ${R2.length}` }),
+      h("p", { class: "card-kicker", text: `Story ${S.s + 1} of ${R2_COUNT}` }),
       h("h2", { id: "storyH", text: st.title }),
       prompt1, list,
       S.shown < total ? h("button", { class: "show-all", type: "button", text: "Show all lines now", onclick: () => { S.shown = total; viewR2(); $("lines").querySelector("button")?.focus(); } }) : null);
-    const kids = [progress(R2.length, S.s, `Round 2 · Story ${S.s + 1} of ${R2.length}`, "Story", `First try: ${S.tally.r2line} ${S.tally.r2line === 1 ? "line" : "lines"}, ${S.tally.r2pat} ${S.tally.r2pat === 1 ? "pattern" : "patterns"}`), card];
+    const kids = [progress(R2_COUNT, S.s, `Round 2 · Story ${S.s + 1} of ${R2_COUNT}`, "Story", `First try: ${S.tally.r2line} ${S.tally.r2line === 1 ? "line" : "lines"}, ${S.tally.r2pat} ${S.tally.r2pat === 1 ? "pattern" : "patterns"}`), card];
 
     if (S.step >= 2) {
       const grid = h("div", { class: "patterns", role: "group", "aria-labelledby": "patH" });
@@ -668,7 +675,7 @@ details.ref dd { margin: 0; color: var(--muted); }
       if (alt) parts.push(h("p", { class: "note" }, h("b", { text: "Also fits" }), alt),
                          h("p", { text: `The pattern most people see here is ${P[st.pattern].name}. ${st.fb}` }));
       else parts.push(h("p", { text: `${P[st.pattern].name}. ${st.fb}` }));
-      const last = S.s === R2.length - 1;
+      const last = S.s === R2_COUNT - 1;
       const next = h("button", { class: "btn", type: "button", text: last ? "Go to Round 3" : "Next story", onclick: () => {
         if (last) go("r3");
         else { S.s++; resetStory(); fb.replaceChildren(); render(); focusEl($("storyH")); }
@@ -826,7 +833,7 @@ details.ref dd { margin: 0; color: var(--muted); }
 
   function viewClosing() {
     setRounds(0, 3);
-    const t = S.tally, nR1 = R1.length, nR2 = R2.length;
+    const t = S.tally, nR1 = R1.length, nR2 = R2_COUNT;
     const total = t.r1 + t.r2line + t.r2pat, max = nR1 + nR2 * 2;
     const nPicks = S.picks.includes("unsure") ? 0 : S.picks.length;
     const after = (n, of) => of - n === 0 ? "All on the first try" : `${of - n} after a clue`;
